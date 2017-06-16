@@ -65,17 +65,16 @@ bool RunLRParser(const LRParser& lr_parser, const std::string& str) {
         if( it != lr_parser.ParseTable.find( stack[stack_index] )->second.end() ) //acceptable
         {
             int ruleNum, numToPop;
-            switch( it->second.action )
+            if( it->second.action==SHIFT )
             {
-                case SHIFT:
                     stack.push_back( nextInput );
                     stack.push_back( it->second.next_state );
                     
                     stack_index += 2;
                     str_index++;
                     break;
-                    
-                case REDUCE:
+            }else if( it->second.action==REDUCE )
+            {
                     ruleNum = it->second.next_state;
                     numToPop = lr_parser.Rules.find(ruleNum)->second.num_rhs;
                     
@@ -89,18 +88,19 @@ bool RunLRParser(const LRParser& lr_parser, const std::string& str) {
                     reducedFactor = lr_parser.Rules.find(ruleNum)->second.lhs_symbol;
                     isReduced = true;
                     break;
-                    
-                case GOTO:
+            }else if( it->second.action==GOTO )
+            {
                     stack.push_back( nextInput );
                     stack.push_back( it->second.next_state );
                     
                     stack_index += 2;
                     break;
-                    
-                case ACCEPT:
+            }else if( it->second.action==ACCEPT )
+                          {
                     return true;
-                    
-                default:
+            }       
+            else
+            {
                     return false;
             }
         }
